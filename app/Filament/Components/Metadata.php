@@ -12,7 +12,7 @@ class Metadata extends Component
 {
     protected string $view = 'filament.components.metadata';
 
-    public static function getComponent()
+    public static function make()
     {
         return Section::make('Metadata')
             ->schema([

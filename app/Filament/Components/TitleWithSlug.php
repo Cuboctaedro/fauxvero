@@ -10,7 +10,7 @@ class TitleWithSlug extends Component
 {
     protected string $view = 'filament.components.title-with-slug';
 
-    public static function getComponent()
+    public static function make()
     {
         return Group::make()
             ->schema([
