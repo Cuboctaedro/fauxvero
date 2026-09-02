@@ -14,6 +14,7 @@ use App\Filament\Components\Metadata;
 use App\Filament\Components\TitleWithSlug;
 use App\Filament\Components\Status;
 use App\Filament\Components\Editor;
+use App\Filament\Components\Images;
 
 class ProductForm
 {
@@ -26,6 +27,7 @@ class ProductForm
                         Group::make()->schema([
                             TitleWithSlug::make(),
                             Editor::make('description'),
+                            Images::gallery(),
                             Section::make('Additional Information')
                                 ->schema([
                                     Textarea::make('dimensions'),
@@ -39,6 +41,8 @@ class ProductForm
 
                         Group::make()->schema([
                             Status::make(),
+                            Images::featured(),
+
                             TextInput::make('price')
                                 ->required()
                                 ->numeric()

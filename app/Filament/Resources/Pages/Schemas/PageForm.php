@@ -11,6 +11,7 @@ use App\Filament\Components\TitleWithSlug;
 use App\Filament\Components\Status;
 use App\Filament\Components\Editor;
 use App\Filament\Components\ContentBlocks;
+use App\Filament\Components\Images;
 use Filament\Schemas\Components\Utilities\Get;
 
 class PageForm
@@ -34,13 +35,15 @@ class PageForm
 
                         Group::make()->schema([
                             Status::make(),
+                            Images::featured(),
                             Select::make('template')
                                 ->options([
                                     'text' => 'Text',
                                     'blocks' => 'Blocks',
                                 ])
                                 ->default('text')
-                                ->live(onBlur: true)
+                                ->live(onBlur: true),
+                            
                         ])->columnSpan(1)
                     ])
             ])->columns(1);

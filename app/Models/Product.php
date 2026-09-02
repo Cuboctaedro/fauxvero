@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Concerns\HasImages;
 
 #[Fillable([
     ...WithMeta::FILLABLE,
@@ -29,7 +33,20 @@ use Spatie\Translatable\HasTranslations;
     'color',
     'material',
 ])]
-class Product extends WithMeta
+class Product extends WithMeta implements HasMedia
 {
     use HasTranslations;
+    use InteractsWithMedia;
+    use HasImages;
+
+    public function registerMediaCollections(): void
+    {
+        $this->addFeaturedImageCollection();
+        $this->addGalleryCollection();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addImageConversions();
+    }
 }

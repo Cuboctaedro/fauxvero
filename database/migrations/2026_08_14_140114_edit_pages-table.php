@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Helpers\MetadataMigration;
 
 return new class extends Migration
 {
@@ -11,17 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        MetadataMigration::addMetadataColumns($table);
-        $table->json('description')->nullable(true);
-        $table->enum('template', ['text', 'blocks'])->default('text');
+        Schema::table('pages', function (Blueprint $table) {
+            MetadataMigration::addMetadataColumns($table);
+            $table->json('description')->nullable(true);
+            $table->enum('template', ['text', 'blocks'])->default('text');
+        });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down($table): void
     {
-        MetadataMigration::dropMetadataColumns($table);
-        $table->dropColumn(['description', 'template']);
+        Schema::table('pages', function (Blueprint $table) {
+            MetadataMigration::dropMetadataColumns($table);
+            $table->dropColumn(['description', 'template']);
+        });
     }
 };

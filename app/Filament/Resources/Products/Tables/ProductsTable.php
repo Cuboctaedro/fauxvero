@@ -7,8 +7,10 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Models\WithMeta;
 
 class ProductsTable
 {
@@ -16,6 +18,10 @@ class ProductsTable
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make(WithMeta::FEATURED)
+                    ->label('Image')
+                    ->collection(WithMeta::FEATURED)
+                    ->conversion('thumb'),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
