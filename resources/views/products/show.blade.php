@@ -31,15 +31,17 @@
             </div>
 
             <div class="col-span-1 sm:col-span-4 md:col-span-8 lg:col-span-4">
+                <section class="content text-lg mb-12">
+                    <h2 class="sr-only">Περιγραφή</h2>
+                    {{ \Filament\Forms\Components\RichEditor\RichContentRenderer::make($product->description) }}
+                </section>
+
                 @if (! $product->in_stock)
                     <x-out-of-stock class="mb-8" />
                 @elseif ($product->price !== null)
                     <x-add-to-cart :product-id="$product->id" class="mb-8" />
                 @endif
-                <section class="content text-lg mb-12">
-                    <h2 class="sr-only">Περιγραφή</h2>
-                    {{ \Filament\Forms\Components\RichEditor\RichContentRenderer::make($product->description) }}
-                </section>
+
                 <section>
                     <h2 class="sr-only">Χαρακτηριστικά</h2>
                     @if($product->dimensions)
