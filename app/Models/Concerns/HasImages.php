@@ -2,42 +2,39 @@
 
 namespace App\Models\Concerns;
 
-use Spatie\Image\Enums\Fit;
+use App\Models\Asset;
+use App\Models\GalleryItem;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
+/**
+ * Images come from the shared media library (Asset): a model points at a featured
+ * asset and, optionally, an ordered gallery of assets.
+ */
 trait HasImages
 {
-    public const IMAGE_MIME_TYPES = [
-        'image/jpeg',
-        'image/png',
-        'image/webp',
-        'image/avif',
-    ];
-
-    protected function addFeaturedImageCollection(): void
+    public function featuredAsset(): BelongsTo
     {
-        $this->addMediaCollection(self::FEATURED)
-            ->singleFile()
-            ->acceptsMimeTypes(self::IMAGE_MIME_TYPES);
+        return $this->belongsTo(Asset::class, 'featured_asset_id');
     }
 
-    protected function addGalleryCollection(): void
+    public function galleryItems(): MorphMany
     {
-        $this->addMediaCollection(self::GALLERY)
-            ->acceptsMimeTypes(self::IMAGE_MIME_TYPES);
+        return $this->morphMany(GalleryItem::class, 'model')->orderBy('order_column');
     }
 
-    protected function addImageConversions(): void
+    public function galleryAssets(): MorphToMany
     {
-        $this->addMediaConversion('thumb')
-            ->fit(Fit::Contain, 320, 320)
-            ->performOnCollections(self::FEATURED, self::GALLERY)
-            ->nonQueued();
+        return $this->morphToMany(Asset::class, 'model', 'asset_gallery')
+            ->withPivot('order_column')
+            ->withTimestamps()
+            ->orderByPivot('order_column');
+    }
 
-        $this->addMediaConversion('web')
-            ->fit(Fit::Max, 1600, 1600)
-            ->format('webp')
-            ->quality(82)
-            ->performOnCollections(self::FEATURED, self::GALLERY)
-            ->queued();
+    protected function featuredImage(): Attribute
+    {
+        return Attribute::get(fn (): string => $this->featuredAsset?->url('web') ?? '');
     }
 }

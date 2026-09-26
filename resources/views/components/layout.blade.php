@@ -21,8 +21,13 @@
   
 </head>
 
-<body>
+<body class="font-mono antialiased bg-gray-200 dark:bg-gray-900 text-black dark:text-gray-100">
+  <a href="#main" class="absolute left-0 right-0 -top-12 z-50 h-12 w-full flex items-center justify-start px-4 bg-black text-white focus:top-0 transition-all text-lg font-bold">
+    Skip to main content
+  </a>
+  <div class="min-h-screen p-3 md:p-6">
     <x-navigation />
         {{ $slot }}
+  </div>
 </body>
 </html>

@@ -26,6 +26,7 @@ class ProductForm
                     ->schema([
                         Group::make()->schema([
                             TitleWithSlug::make(),
+                            TextInput::make('type'),
                             Editor::make('description'),
                             Images::gallery(),
                             Section::make('Additional Information')

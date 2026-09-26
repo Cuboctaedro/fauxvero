@@ -2,29 +2,30 @@
 
 namespace App\Filament\Components;
 
-use Filament\Schemas\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\Str;
 
-class TitleWithSlug extends Component
+class TitleWithSlug
 {
-    protected string $view = 'filament.components.title-with-slug';
-
-    public static function make()
+    public static function make(): Group
     {
         return Group::make()
             ->schema([
                 TextInput::make('name')
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function (Set $set, ?string $state, $livewire) {
-                        if ($livewire->activeLocale !== 'en') {
+                    ->afterStateUpdated(function (Set $set, ?string $state, string $operation, $livewire) {
+                        // Only slugify on create, and only from the primary (first) locale.
+                        if ($operation !== 'create' || $livewire->activeLocale !== filament('spatie-translatable')->getDefaultLocales()[0]) {
                             return;
                         }
-                        $set('slug', Str::slug($state));
+                        $set('slug', Str::slug($state ?? ''));
                     })
                     ->required(),
                 TextInput::make('slug')
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true),
             ]);
     }
 }

@@ -15,7 +15,7 @@ class Editor extends Component
         return RichEditor::make($name)
             ->toolbarButtons([
                 ['bold', 'italic', 'link'],
-                ['h3', 'h4'],
+                ['h2', 'h3', 'h4'],
                 ['orderedList', 'bulletList'],
             ]);
 

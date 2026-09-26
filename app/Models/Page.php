@@ -2,14 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasImages;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use App\Models\Concerns\HasImages;
 
 #[Fillable([
     ...WithMeta::FILLABLE,
@@ -17,25 +13,15 @@ use App\Models\Concerns\HasImages;
     'content',
     'status',
     'slug',
+    'featured_asset_id',
 ])]
 #[Translatable([
     ...WithMeta::TRANSLATABLE,
     'name',
     'content',
 ])]
-class Page extends WithMeta implements HasMedia
+class Page extends WithMeta
 {
-    use HasTranslations;
-    use InteractsWithMedia;
     use HasImages;
-
-    public function registerMediaCollections(): void
-    {
-        $this->addFeaturedImageCollection();
-    }
-
-    public function registerMediaConversions(?Media $media = null): void
-    {
-        $this->addImageConversions();
-    }
+    use HasTranslations;
 }

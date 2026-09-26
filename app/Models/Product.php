@@ -2,18 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasImages;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use App\Models\Concerns\HasImages;
 
 #[Fillable([
     ...WithMeta::FILLABLE,
     'name',
+    'type',
     'description',
     'dimensions',
     'weight',
@@ -23,30 +21,21 @@ use App\Models\Concerns\HasImages;
     'price',
     'in_stock',
     'slug',
+    'featured_asset_id',
 ])]
 #[Translatable([
     ...WithMeta::TRANSLATABLE,
     'name',
+    'type',
     'description',
     'dimensions',
     'weight',
     'color',
     'material',
 ])]
-class Product extends WithMeta implements HasMedia
+class Product extends WithMeta
 {
-    use HasTranslations;
-    use InteractsWithMedia;
+    use HasFactory;
     use HasImages;
-
-    public function registerMediaCollections(): void
-    {
-        $this->addFeaturedImageCollection();
-        $this->addGalleryCollection();
-    }
-
-    public function registerMediaConversions(?Media $media = null): void
-    {
-        $this->addImageConversions();
-    }
+    use HasTranslations;
 }

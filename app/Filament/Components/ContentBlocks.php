@@ -10,6 +10,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
 use App\Filament\Components\Image;
+use Filament\Forms\Components\RichEditor;
 
 class ContentBlocks extends Component
 {
@@ -37,7 +38,11 @@ class ContentBlocks extends Component
                     ->columns(2),
                 Block::make('paragraph')
                     ->schema([
-                        Textarea::make('content')
+                        RichEditor::make('content')
+                            ->toolbarButtons([
+                                ['bold', 'italic', 'link'],
+                                ['orderedList', 'bulletList'],
+                            ])
                             ->label('Paragraph')
                             ->required(),
                     ]),

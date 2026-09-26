@@ -2,49 +2,27 @@
 
 namespace App\Filament\Components;
 
-use App\Models\WithMeta;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Placeholder;
+use App\Filament\Resources\Assets\Schemas\AssetForm;
+use App\Models\Asset;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Image pickers backed by the shared media library: records reference Assets, so
+ * an image uploaded once can be reused anywhere, and its alt text is kept once.
+ */
 class Images
 {
     public static function featured(): Section
     {
         return Section::make('Featured Image')
             ->schema([
-                SpatieMediaLibraryFileUpload::make(WithMeta::FEATURED)
-                    ->label('Image')
-                    ->collection(WithMeta::FEATURED)
-                    ->image()
-                    ->imageEditor()
-                    ->conversion('thumb')
-                    ->maxSize(5120),
-
-                TextInput::make('featured_alt')
-                    ->label('Alt text')
-                    ->hiddenOn('create')
-                    ->dehydrated(false)
-                    ->afterStateHydrated(function (TextInput $component, ?Model $record, $livewire): void {
-                        $media = $record?->getFirstMedia(WithMeta::FEATURED);
-
-                        $component->state(
-                            $media?->getTranslation('alt', $livewire->activeLocale, false) ?? ''
-                        );
-                    })
-                    ->saveRelationshipsUsing(function (TextInput $component, ?Model $record, $livewire): void {
-                        $media = $record?->getFirstMedia(WithMeta::FEATURED);
-
-                        $media?->setTranslation('alt', $livewire->activeLocale, (string) $component->getState())
-                            ->save();
-                    }),
+                self::picker(Select::make('featured_asset_id'), 'featuredAsset')
+                    ->hiddenLabel(),
             ]);
     }
 
@@ -52,81 +30,85 @@ class Images
     {
         return Section::make('Gallery')
             ->schema([
-                SpatieMediaLibraryFileUpload::make(WithMeta::GALLERY)
-                    ->label('Images')
-                    ->collection(WithMeta::GALLERY)
-                    ->multiple()
+                Repeater::make('galleryItems')
+                    ->hiddenLabel()
+                    ->relationship()
+                    ->orderColumn('order_column')
                     ->reorderable()
-                    ->appendFiles()
-                    ->image()
-                    ->imageEditor()
-                    ->conversion('thumb')
-                    ->panelLayout('grid')
-                    ->maxSize(5120),
-
-                self::galleryAltText(),
+                    ->defaultItems(0)
+                    ->addActionLabel('Add image')
+                    ->grid(3)
+                    ->simple(
+                        self::picker(Select::make('asset_id'), 'asset')
+                            ->required()
+                            ->distinct(),
+                    ),
             ]);
     }
 
     /**
-     * Alt text for the gallery images.
-     *
-     * Deliberately not bound with ->relationship(): a relationship repeater deletes
-     * related records missing from its state, which would wipe images uploaded by the
-     * file upload component in the same request. State is hydrated and saved by hand
-     * instead, against the locale the page's locale switcher is currently on.
+     * A searchable select of library images that can also upload a new image, or
+     * edit the chosen one's name and alt text, without leaving the form. Alt text is
+     * read and written in the locale the page's locale switcher is on.
      */
-    protected static function galleryAltText(): Repeater
+    protected static function picker(Select $select, string $relationship): Select
     {
-        return Repeater::make('gallery_alt')
-            ->label('Alt text')
-            ->hiddenOn('create')
-            ->dehydrated(false)
-            ->addable(false)
-            ->deletable(false)
-            ->reorderable(false)
-            ->columns(2)
-            ->schema([
-                Hidden::make('preview'),
-                // Read through $get, never by injecting $state: a Placeholder resolves
-                // its own state from its content, so $state injection recurses forever.
-                Placeholder::make('thumbnail')
-                    ->hiddenLabel()
-                    ->content(fn (Get $get): HtmlString => new HtmlString(
-                        '<img src="'.e($get('preview')).'" class="h-20 w-20 rounded object-cover">'
-                    )),
-                TextInput::make('alt')
-                    ->hiddenLabel(),
-            ])
-            ->afterStateHydrated(function (Repeater $component, ?Model $record, $livewire): void {
-                $component->state(
-                    $record
-                        ?->getMedia(WithMeta::GALLERY)
-                        ->mapWithKeys(fn (Media $media): array => [
-                            $media->uuid => [
-                                'preview' => $media->hasGeneratedConversion('thumb')
-                                    ? $media->getUrl('thumb')
-                                    : $media->getUrl(),
-                                'alt' => $media->getTranslation('alt', $livewire->activeLocale, false),
-                            ],
-                        ])
-                        ->all() ?? []
-                );
+        return $select
+            ->relationship(
+                $relationship,
+                'name',
+                modifyQueryUsing: fn (Builder $query) => $query->with('media')->latest(),
+            )
+            ->getOptionLabelFromRecordUsing(fn (Asset $record): string => self::optionLabel($record))
+            ->allowHtml()
+            ->searchable()
+            ->preload()
+            ->createOptionForm(AssetForm::fields())
+            ->createOptionUsing(function (array $data, Schema $schema, $livewire): int {
+                $asset = new Asset(['name' => $data['name']]);
+                $asset->setTranslation('alt', self::locale($livewire), (string) ($data['alt'] ?? ''));
+                $asset->save();
 
-                $component->hydrateItems();
+                // Stores the uploaded file on the new asset.
+                $schema->model($asset)->saveRelationships();
+
+                return $asset->getKey();
             })
-            ->saveRelationshipsUsing(function (Repeater $component, ?Model $record, $livewire): void {
-                $state = $component->getState();
+            ->editOptionForm([
+                TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('alt')
+                    ->label('Alt text')
+                    ->helperText('Shared by every place this image is used.'),
+            ])
+            ->fillEditOptionActionFormUsing(fn (Select $component, $livewire): ?array => ($asset = $component->getSelectedRecord())
+                ? [
+                    'name' => $asset->name,
+                    'alt' => $asset->getTranslation('alt', self::locale($livewire), false),
+                ]
+                : null)
+            ->updateOptionUsing(function (array $data, Schema $schema, $livewire): void {
+                $asset = $schema->getRecord();
 
-                $record?->getMedia(WithMeta::GALLERY)
-                    ->each(function (Media $media) use ($state, $livewire): void {
-                        if (! array_key_exists($media->uuid, $state)) {
-                            return;
-                        }
-
-                        $media->setTranslation('alt', $livewire->activeLocale, (string) ($state[$media->uuid]['alt'] ?? ''))
-                            ->save();
-                    });
+                $asset?->fill(['name' => $data['name']])
+                    ->setTranslation('alt', self::locale($livewire), (string) ($data['alt'] ?? ''))
+                    ->save();
             });
+    }
+
+    protected static function optionLabel(Asset $asset): string
+    {
+        // Inline styles: the panel has no custom theme, so arbitrary utility classes
+        // aren't guaranteed to exist in Filament's compiled CSS.
+        return '<span style="display:flex;align-items:center;gap:.5rem">'
+            .'<img src="'.e($asset->url('thumb')).'" alt="" style="width:2.5rem;height:2.5rem;flex-shrink:0;border-radius:.25rem;object-fit:cover">'
+            .'<span>'.e($asset->name).'</span>'
+            .'</span>';
+    }
+
+    protected static function locale($livewire): string
+    {
+        return $livewire->activeLocale ?? app()->getLocale();
     }
 }

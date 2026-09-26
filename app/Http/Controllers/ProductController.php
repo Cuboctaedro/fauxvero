@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = \App\Models\Product::all();
+        $products = Product::with('featuredAsset.media')->get();
 
         return view('products.index', compact('products'));
     }
 
     public function show($slug)
     {
-        $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
+        $product = Product::with('featuredAsset.media', 'galleryAssets.media')
+            ->where('slug', $slug)->firstOrFail();
 
         return view('products.show', compact('product'));
     }

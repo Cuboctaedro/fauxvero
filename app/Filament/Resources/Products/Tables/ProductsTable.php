@@ -2,26 +2,27 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Models\WithMeta;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('featuredAsset.media'))
             ->columns([
-                SpatieMediaLibraryImageColumn::make(WithMeta::FEATURED)
+                ImageColumn::make('featured_thumb')
                     ->label('Image')
-                    ->collection(WithMeta::FEATURED)
-                    ->conversion('thumb'),
+                    ->state(fn (Product $record): ?string => $record->featuredAsset?->url('thumb') ?: null),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -30,7 +31,7 @@ class ProductsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('price')
-                    ->money()
+                    ->money('euro', true)
                     ->sortable(),
                 IconColumn::make('in_stock')
                     ->boolean(),

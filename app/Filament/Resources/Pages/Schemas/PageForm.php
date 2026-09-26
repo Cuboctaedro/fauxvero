@@ -2,17 +2,17 @@
 
 namespace App\Filament\Resources\Pages\Schemas;
 
-use Filament\Schemas\Schema;
+use App\Filament\Components\ContentBlocks;
+use App\Filament\Components\Editor;
+use App\Filament\Components\Images;
+use App\Filament\Components\Metadata;
+use App\Filament\Components\Status;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
-use App\Filament\Components\Metadata;
-use App\Filament\Components\TitleWithSlug;
-use App\Filament\Components\Status;
-use App\Filament\Components\Editor;
-use App\Filament\Components\ContentBlocks;
-use App\Filament\Components\Images;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 
 class PageForm
 {
@@ -23,7 +23,11 @@ class PageForm
                 Grid::make(4)
                     ->schema([
                         Group::make()->schema([
-                            TitleWithSlug::make(),
+                            TextInput::make('name')
+                                ->required(),
+                            TextInput::make('slug')
+                                ->required()
+                                ->unique(ignoreRecord: true),
                             Editor::make('description')
                                 ->label('Content')
                                 ->hidden(fn (Get $get): bool => $get('template') !== 'text'),
@@ -43,9 +47,9 @@ class PageForm
                                 ])
                                 ->default('text')
                                 ->live(onBlur: true),
-                            
-                        ])->columnSpan(1)
-                    ])
+
+                        ])->columnSpan(1),
+                    ]),
             ])->columns(1);
     }
 }
