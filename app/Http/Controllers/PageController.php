@@ -8,7 +8,7 @@ class PageController extends Controller
 {
     public function show($slug)
     {
-        $page = \App\Models\Page::where('slug', $slug)->firstOrFail();
+        $page = \App\Models\Page::active()->where('slug', $slug)->firstOrFail();
 
         return view('page', compact('page'));
     }

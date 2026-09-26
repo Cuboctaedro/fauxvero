@@ -21,7 +21,9 @@ class PagesTable
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-            ])
+                 TextColumn::make('template')
+                    ->sortable(),
+           ])
             ->filters([
                 //
             ])

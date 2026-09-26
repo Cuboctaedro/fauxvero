@@ -9,7 +9,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
-use App\Filament\Components\Image;
 use Filament\Forms\Components\RichEditor;
 
 class ContentBlocks extends Component
@@ -48,15 +47,14 @@ class ContentBlocks extends Component
                     ]),
                 Block::make('image')
                     ->schema([
-                        Image::make(),
+                        Images::asset()->required(),
                     ]),
                 Block::make('gallery')
                     ->schema([
                         Repeater::make('images')
                             ->label('Gallery Images')
-                            ->schema([
-                                Image::make(),
-                            ]),
+                            ->simple(Images::asset()->required())
+                            ->reorderable(),
                     ]),
                 Block::make('list')
                     ->schema([

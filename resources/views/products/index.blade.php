@@ -8,7 +8,7 @@
                 <x-product-card
                     :title="$product->name"
                     :type="$product->type"
-                    :image="$product->featuredImage"
+                    :asset="$product->featuredAsset"
                     :price="$product->price"
                     :slug="$product->slug"
                     :in-stock="$product->in_stock"

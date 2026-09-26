@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Models\Asset;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -14,7 +15,7 @@ class ProductCard extends Component
     public function __construct(
         public string $title,
         public ?string $type,
-        public string $image,
+        public ?Asset $asset,
         public ?string $price,
         public string $slug,
         public bool $inStock = true,

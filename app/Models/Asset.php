@@ -37,6 +37,16 @@ class Asset extends Model implements HasMedia
         'image/avif',
     ];
 
+    /**
+     * Responsive widths offered in srcset, mapped to the conversion that holds each.
+     */
+    public const WIDTHS = [
+        400 => 'w400',
+        800 => 'w800',
+        1200 => 'w1200',
+        1600 => 'web',
+    ];
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection(self::COLLECTION)
@@ -51,11 +61,13 @@ class Asset extends Model implements HasMedia
             ->fit(Fit::Contain, 320, 320)
             ->nonQueued();
 
-        $this->addMediaConversion('web')
-            ->fit(Fit::Max, 1600, 1600)
-            ->format('webp')
-            ->quality(82)
-            ->queued();
+        foreach (self::WIDTHS as $width => $conversion) {
+            $this->addMediaConversion($conversion)
+                ->fit(Fit::Max, $width, $width)
+                ->format('webp')
+                ->quality(82)
+                ->queued();
+        }
     }
 
     public function galleryItems(): HasMany
@@ -87,5 +99,23 @@ class Asset extends Model implements HasMedia
         return $conversion !== '' && $media->hasGeneratedConversion($conversion)
             ? $media->getUrl($conversion)
             : $media->getUrl();
+    }
+
+    /**
+     * Only lists conversions that have been generated, so it is empty until the
+     * queued conversions have run and the image falls back to its src.
+     */
+    public function srcset(): string
+    {
+        $media = $this->getFirstMedia(self::COLLECTION);
+
+        if (! $media) {
+            return '';
+        }
+
+        return collect(self::WIDTHS)
+            ->filter(fn (string $conversion): bool => $media->hasGeneratedConversion($conversion))
+            ->map(fn (string $conversion, int $width): string => $media->getUrl($conversion).' '.$width.'w')
+            ->implode(', ');
     }
 }

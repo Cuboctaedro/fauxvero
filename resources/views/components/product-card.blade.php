@@ -1,8 +1,11 @@
 <article class="flex flex-col items-stretch pb-6">
     <a href="/products/{{ $slug }}" class="aspect-square bg-gray-200 flex items-center justify-center">
-        @if ($image)
-        <img src="{{ $image }}" alt="{{ $title }}" class="object-cover w-full h-full ">
-    @endif
+        <x-asset-image
+            :asset="$asset"
+            :alt="$title"
+            sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+            class="object-cover w-full h-full"
+        />
 
     </a>
     <header >

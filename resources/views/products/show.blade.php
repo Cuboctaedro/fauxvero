@@ -24,7 +24,13 @@
             <div class="col-span-1 sm:col-span-4 md:col-span-8">
                 @foreach($product->galleryAssets as $asset)
                     <div class=" bg-gray-200 flex items-center justify-center mb-4">
-                        <img src="{{ $asset->url('web') }}" alt="{{ $asset->alt ?: $product->name }}" class="object-cover w-full h-full ">
+                        <x-asset-image
+                            :asset="$asset"
+                            :alt="$asset->alt ?: $product->name"
+                            sizes="(min-width: 1280px) 820px, (min-width: 1024px) 66vw, 100vw"
+                            :loading="$loop->first ? 'eager' : 'lazy'"
+                            class="object-cover w-full h-full"
+                        />
                     </div>
                 @endforeach
 

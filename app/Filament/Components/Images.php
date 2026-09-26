@@ -47,6 +47,27 @@ class Images
     }
 
     /**
+     * A library image picker for JSON fields such as content blocks, which store the
+     * asset id without an Eloquent relationship. Alt text is edited on the asset itself.
+     */
+    public static function asset(string $name = 'asset_id'): Select
+    {
+        return Select::make($name)
+            ->label('Image')
+            ->options(fn (): array => self::options(Asset::query()->latest()->limit(50)))
+            ->getSearchResultsUsing(fn (string $search): array => self::options(
+                Asset::query()->where('name', 'like', "%{$search}%")->latest()->limit(50),
+            ))
+            ->getOptionLabelUsing(fn ($value): ?string => ($asset = Asset::with('media')->find($value))
+                ? self::optionLabel($asset)
+                : null)
+            ->allowHtml()
+            ->searchable()
+            ->createOptionForm(AssetForm::fields())
+            ->createOptionUsing(fn (array $data, Schema $schema, $livewire): int => self::createAsset($data, $schema, $livewire));
+    }
+
+    /**
      * A searchable select of library images that can also upload a new image, or
      * edit the chosen one's name and alt text, without leaving the form. Alt text is
      * read and written in the locale the page's locale switcher is on.
@@ -64,16 +85,7 @@ class Images
             ->searchable()
             ->preload()
             ->createOptionForm(AssetForm::fields())
-            ->createOptionUsing(function (array $data, Schema $schema, $livewire): int {
-                $asset = new Asset(['name' => $data['name']]);
-                $asset->setTranslation('alt', self::locale($livewire), (string) ($data['alt'] ?? ''));
-                $asset->save();
-
-                // Stores the uploaded file on the new asset.
-                $schema->model($asset)->saveRelationships();
-
-                return $asset->getKey();
-            })
+            ->createOptionUsing(fn (array $data, Schema $schema, $livewire): int => self::createAsset($data, $schema, $livewire))
             ->editOptionForm([
                 TextInput::make('name')
                     ->required()
@@ -95,6 +107,25 @@ class Images
                     ->setTranslation('alt', self::locale($livewire), (string) ($data['alt'] ?? ''))
                     ->save();
             });
+    }
+
+    protected static function createAsset(array $data, Schema $schema, $livewire): int
+    {
+        $asset = new Asset(['name' => $data['name']]);
+        $asset->setTranslation('alt', self::locale($livewire), (string) ($data['alt'] ?? ''));
+        $asset->save();
+
+        // Stores the uploaded file on the new asset.
+        $schema->model($asset)->saveRelationships();
+
+        return $asset->getKey();
+    }
+
+    protected static function options(Builder $query): array
+    {
+        return $query->with('media')->get()
+            ->mapWithKeys(fn (Asset $asset): array => [$asset->getKey() => self::optionLabel($asset)])
+            ->all();
     }
 
     protected static function optionLabel(Asset $asset): string
