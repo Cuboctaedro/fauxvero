@@ -5,14 +5,22 @@
     @endif
 
     </a>
-    <header class="flex flex-row items-start justify-between gap-2">
+    <header >
         <h3 class="text-lg font-semibold">
             <a href="/products/{{ $slug }}">
             {{ $title }}
             </a>
         </h3>
-        <p class="text-lg font-semibold">{{ $price }} €</p>
+        
     </header>
-            <p class="">{{ $type }} €</p>
+    <div class="flex flex-row items-start justify-between gap-2">
+        <p class="">{{ $type }}</p>
+        @if ($price !== null)
+            <p class=" font-semibold">{{ $price }} €</p>
+        @endif
+    </div>
+    @unless ($inStock)
+        <x-out-of-stock class="self-start mt-1" />
+    @endunless
 
 </article>

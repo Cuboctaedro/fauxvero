@@ -25,6 +25,7 @@ class ProductFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'type' => fake()->randomElement(['Lamp', 'Chair', 'Table', 'Vase']),
             'description' => fake()->paragraphs(3, true),
             'price' => fake()->randomFloat(2, 10, 500),
             'dimensions' => fake()->numberBetween(10, 100).' x '.fake()->numberBetween(10, 100).' x '.fake()->numberBetween(10, 100).' cm',

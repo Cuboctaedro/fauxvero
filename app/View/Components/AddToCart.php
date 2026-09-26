@@ -6,18 +6,13 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class ProductCard extends Component
+class AddToCart extends Component
 {
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public string $title,
-        public ?string $type,
-        public string $image,
-        public ?string $price,
-        public string $slug,
-        public bool $inStock = true,
+        public int $productId,
     ) {}
 
     /**
@@ -25,6 +20,6 @@ class ProductCard extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.product-card');
+        return view('components.add-to-cart');
     }
 }

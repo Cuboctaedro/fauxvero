@@ -8,14 +8,14 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('featuredAsset.media')->get();
+        $products = Product::active()->with('featuredAsset.media')->get();
 
         return view('products.index', compact('products'));
     }
 
     public function show($slug)
     {
-        $product = Product::with('featuredAsset.media', 'galleryAssets.media')
+        $product = Product::active()->with('featuredAsset.media', 'galleryAssets.media')
             ->where('slug', $slug)->firstOrFail();
 
         return view('products.show', compact('product'));

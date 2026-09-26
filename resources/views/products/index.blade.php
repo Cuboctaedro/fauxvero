@@ -2,7 +2,7 @@
 
     <main>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-start">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start">
 
             @foreach ($products as $product)
                 <x-product-card
@@ -11,6 +11,7 @@
                     :image="$product->featuredImage"
                     :price="$product->price"
                     :slug="$product->slug"
+                    :in-stock="$product->in_stock"
                 />
             @endforeach
 
