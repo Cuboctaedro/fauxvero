@@ -1,5 +1,5 @@
 # Production stack for Coolify (Docker Compose build pack).
-# MySQL runs as a separate Coolify resource; see DEPLOYMENT.md.
+# MySQL is the shared Coolify MySQL resource (one database + user per site); see DEPLOYMENT.md.
 # ${VAR:?} is required and ${VAR:-x} has a default; Coolify shows them all in the UI.
 
 services:
