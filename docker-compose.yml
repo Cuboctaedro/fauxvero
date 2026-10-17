@@ -28,7 +28,7 @@ services:
       DB_USERNAME: "${DB_USERNAME:?}"
       DB_PASSWORD: "${DB_PASSWORD:?}"
       SESSION_DRIVER: database
-      SESSION_SECURE_COOKIE: "true"
+      SESSION_SECURE_COOKIE: "${SESSION_SECURE_COOKIE:-true}"
       CACHE_STORE: database
       QUEUE_CONNECTION: database
       MAIL_MAILER: "${MAIL_MAILER:-log}"

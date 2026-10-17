@@ -265,6 +265,7 @@ Coolify lists the variables from `docker-compose.yml` on the **Environment Varia
 | `DB_USERNAME` | `fauxvero` |
 | `DB_PASSWORD` | the password from C2 |
 | `LOG_LEVEL`, `MAIL_MAILER` | optional; default to `warning` and `log` |
+| `SESSION_SECURE_COOKIE` | optional; defaults to `true`. Set it to `false` only while testing on Coolify's http `sslip.io` domain (browsers drop secure cookies over http, so every login fails with "This page has expired"), and delete it once the real https domain is set |
 
 `DB_PORT` defaults to `3306`, and `APP_NAME` to `Fauxvero`. Everything else is fixed in `docker-compose.yml`.
 
