@@ -70,7 +70,8 @@ publishes, which a firewall on the server itself (ufw) does not.
 Ports **8000** and **6001-6002** (Coolify's dashboard, realtime and terminal) should not be open: the dashboard is
 reached through its HTTPS domain. If they are still open because the dashboard is used at `http://<server-ip>:8000`,
 give it a domain first (**Settings → Configuration → Domain** in Coolify, with an `A` record pointing at the server),
-then remove those rules. MySQL (3306) is never opened: sites reach it over Docker's internal network.
+then remove those rules. MySQL (3306) is never opened in the firewall: sites reach it over Docker's internal network,
+and a desktop client connects through SSH (see **B5**).
 
 ### A3. Coolify settings
 
@@ -130,7 +131,8 @@ resource. A database that belongs to the other project alone is better left alon
 
 1. In Coolify, go to **Projects → + Add**, name it **Shared**, and open its **production** environment.
 2. **+ New → Databases → MySQL**. Pick 8.4 (the current LTS) and name it `mysql`.
-3. Leave **Make it publicly available** off, then click **Start**.
+3. Leave **Make it publicly available** off for now, then click **Start**. **B5** turns it on for desktop-client
+   access.
 
 ### B2. Note the connection details
 
@@ -170,6 +172,43 @@ GRANT ALL PRIVILEGES ON fauxvero.* TO 'fauxvero'@'%';
 
 Generate the password with e.g. `openssl rand -base64 24` and keep it in your password manager. Each site's user can
 see only its own database. Ignore the `default` database Coolify creates.
+
+### B5. Connecting with a desktop client
+
+To browse or edit the databases, use a desktop client such as TablePlus, Sequel Ace or DBeaver over an SSH tunnel.
+Nothing extra runs on the server, and MySQL stays unreachable from the internet.
+
+1. **Bind MySQL to a host port.** On the MySQL resource's **General** page, turn on **Make it publicly available** and
+   set **Public port** to `3306`. Coolify starts a small proxy container that publishes that port on the server.
+   Despite the name, the port is not reachable from the internet: the Hetzner Cloud Firewall (A2) has no rule for
+   3306, and it filters ports that Docker publishes too.
+2. **Check that it is closed from outside.** On your Mac, this must time out:
+
+   ```bash
+   nc -zv -G 5 <server-ip> 3306
+   ```
+
+   If it connects, the firewall from A2 is not applied. Turn the setting off again and fix A2 first.
+3. **Set up the client** with a connection of type MySQL over SSH:
+
+   | Setting | Value |
+   | --- | --- |
+   | SSH host | `<server-ip>` |
+   | SSH port | `22` |
+   | SSH user | `root`, with the same SSH key you use for the server |
+   | MySQL host | `127.0.0.1` |
+   | MySQL port | `3306` |
+   | MySQL user and password | the site's user (e.g. `fauxvero`) for that site's database, or `root` with the password from B2 for all of them |
+
+4. **Clients without built-in SSH**: open the tunnel by hand, then connect the client to `127.0.0.1`, port `3308`:
+
+   ```bash
+   ssh -N -L 3308:127.0.0.1:3306 root@<server-ip>
+   ```
+
+   Local port 3308 avoids the MySQL servers already running on your Mac (Herd's is on 3307).
+
+Prefer the site's own user for everyday work: `root` can drop any site's database.
 
 ---
 
@@ -250,6 +289,9 @@ Open the `app` service's **Terminal** in Coolify and run:
 php artisan make:filament-user
 ```
 
+That creates the first user only. Add everyone else from **Users** in the panel: either type a password for them, or
+leave it empty to email them a link to set their own (needs mail, see **Not set up yet**).
+
 Log in to the Filament panel, upload a product image and check that the resized WebP versions appear shortly after.
 That proves the `queue` worker is running.
 
@@ -304,6 +346,7 @@ Every new site on this stack follows the same recipe:
   queue worker restarts with the new code.
 - **Logs**: each service's **Logs** tab in Coolify (the app logs to stderr).
 - **Rolling back**: the application's **Rollback** tab redeploys a previous image. Migrations are not rolled back.
+- **Database access**: a desktop client over an SSH tunnel (B5).
 - **Backups**: MySQL dumps go to S3 storage daily and are kept for 30 days (B3). The whole server, uploaded images
   included, has Hetzner's daily backup, which keeps the last 7 (A6). Try a restore once, e.g. load a dump into a
   scratch database, so you know the steps before you need them.
@@ -314,5 +357,7 @@ Every new site on this stack follows the same recipe:
 
 - **Scheduler**: nothing is scheduled today. When the first scheduled task is added, add a `scheduler` service to
   `docker-compose.yml` running `php /var/www/html/artisan schedule:work`.
-- **Mail**: `MAIL_MAILER` defaults to `log`. Configure SMTP variables when order emails are added. Hetzner blocks
-  outgoing ports 25 and 465 on new accounts, so use a mail provider on port 587, or ask Hetzner to unblock them.
+- **Mail**: `MAIL_MAILER` defaults to `log`, so password-reset and new-user emails from the panel only reach the
+  `queue` service's logs. Until mail is set up, admins set passwords from **Users** instead. Configure SMTP variables
+  when order emails are added. Hetzner blocks outgoing ports 25 and 465 on new accounts, so use a mail provider on
+  port 587, or ask Hetzner to unblock them.
