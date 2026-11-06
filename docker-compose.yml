@@ -7,6 +7,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        GITHUB_TOKEN: "${GITHUB_TOKEN:-}"
     restart: unless-stopped
     environment:
       # Runs migrations, storage:link and the Laravel caches on every start.
@@ -40,6 +42,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        GITHUB_TOKEN: "${GITHUB_TOKEN:-}"
     restart: unless-stopped
     command: ["php", "/var/www/html/artisan", "queue:work", "--tries=3", "--max-time=3600"]
     stop_signal: SIGTERM

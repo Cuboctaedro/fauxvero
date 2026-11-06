@@ -19,7 +19,11 @@ WORKDIR /var/www/html
 FROM base AS vendor
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --no-scripts --no-autoloader
+# GitHub rejects anonymous package downloads from server IPs (HTTP 504), so the
+# build authenticates when GITHUB_TOKEN is set. This stage isn't in the final image.
+ARG GITHUB_TOKEN
+RUN if [ -n "$GITHUB_TOKEN" ]; then export COMPOSER_AUTH="{\"github-oauth\":{\"github.com\":\"$GITHUB_TOKEN\"}}"; fi \
+    && composer install --no-dev --no-interaction --no-progress --prefer-dist --no-scripts --no-autoloader
 
 ############################################
 # Frontend assets
