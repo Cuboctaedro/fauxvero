@@ -1,9 +1,9 @@
-<x-layout meta-title="Ευχαριστούμε | Fauxvero" :meta-robots="false" page-path="/checkout/thank-you">
+<x-layout :meta-title="__('Thank you').' | Fauxvero'" :meta-robots="false">
     <section class="max-w-2xl" @if (session('checkout.placed')) x-data x-init="$store.cart.clear()" @endif>
-        <h1 class="text-3xl font-bold mb-2">Ευχαριστούμε για την παραγγελία σας</h1>
+        <h1 class="text-3xl font-bold mb-2">{{ __('Thank you for your order') }}</h1>
         <p class="mb-6">
-            Αριθμός παραγγελίας: <strong>{{ $order->number }}</strong>.
-            Θα επικοινωνήσουμε μαζί σας στο {{ $order->email }}.
+            {{ __('Order number') }}: <strong>{{ $order->number }}</strong>.
+            {{ __('We will contact you at :email.', ['email' => $order->email]) }}
         </p>
 
         <ul class="divide-y divide-gray-400 border-y border-gray-400">
@@ -16,10 +16,10 @@
         </ul>
 
         <p class="mt-4 flex justify-between text-lg">
-            <span>Σύνολο</span>
+            <span>{{ __('Total') }}</span>
             <span class="font-bold">{{ $order->total }} €</span>
         </p>
 
-        <a href="{{ route('products.index') }}" class="mt-8 inline-block underline">Συνέχεια αγορών</a>
+        <a href="{{ route('products.index') }}" class="mt-8 inline-block underline">{{ __('Continue shopping') }}</a>
     </section>
 </x-layout>

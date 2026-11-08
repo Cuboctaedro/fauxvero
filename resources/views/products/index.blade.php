@@ -1,4 +1,4 @@
-<x-layout>
+<x-layout :meta-title="__('Products').' | Fauxvero'">
 
     <main>
 

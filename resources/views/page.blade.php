@@ -1,4 +1,7 @@
-<x-layout :meta-title="$page->name">
+<x-layout
+    :meta-title="$page->meta_title ?: $page->name"
+    :meta-description="$page->meta_description ?? ''"
+>
 
     <article class="max-w-3xl">
         <h1 class="text-3xl font-bold mb-6">{{ $page->name }}</h1>

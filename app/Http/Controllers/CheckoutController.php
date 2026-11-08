@@ -20,7 +20,7 @@ class CheckoutController extends Controller
 
         if (! $cart->isPurchasable()) {
             return back()->withInput()->withErrors([
-                'items' => 'Κάποια προϊόντα του καλαθιού δεν είναι πλέον διαθέσιμα. Ελέγξτε το καλάθι σας.',
+                'items' => __('Some products in your cart are no longer available. Please review your cart.'),
             ]);
         }
 

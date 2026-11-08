@@ -1,22 +1,22 @@
-<x-layout meta-title="Ταμείο | Fauxvero" :meta-robots="false" page-path="/checkout">
-    <section x-data="cartLines">
-        <h1 class="text-3xl font-bold mb-6">Ταμείο</h1>
+<x-layout :meta-title="__('Checkout').' | Fauxvero'" :meta-robots="false">
+    <section x-data="cartLines(@js(route('cart.lines')))">
+        <h1 class="text-3xl font-bold mb-6">{{ __('Checkout') }}</h1>
 
         @error('items')
             <p class="mb-6 p-4 border border-red-700 text-red-700" role="alert">
-                {{ $message }} <a href="{{ route('cart.index') }}" class="underline">Μετάβαση στο καλάθι</a>
+                {{ $message }} <a href="{{ route('cart.index') }}" class="underline">{{ __('Go to cart') }}</a>
             </p>
         @enderror
 
-        <p x-show="loading" class="text-gray-600">Φόρτωση…</p>
+        <p x-show="loading" class="text-gray-600">{{ __('Loading…') }}</p>
 
         <p x-cloak x-show="failed" class="text-red-700" role="alert">
-            Δεν ήταν δυνατή η φόρτωση του καλαθιού. Δοκιμάστε ξανά.
+            {{ __('The cart could not be loaded. Please try again.') }}
         </p>
 
         <div x-cloak x-show="!loading && !failed && lines.length === 0">
-            <p class="mb-4">Το καλάθι σας είναι άδειο.</p>
-            <a href="{{ route('products.index') }}" class="underline">Δείτε τα προϊόντα</a>
+            <p class="mb-4">{{ __('Your cart is empty.') }}</p>
+            <a href="{{ route('products.index') }}" class="underline">{{ __('Browse products') }}</a>
         </div>
 
         <div x-cloak x-show="!loading && !failed && lines.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -30,15 +30,15 @@
                 @csrf
                 <input type="hidden" name="items" x-ref="items">
 
-                <h2 class="text-xl font-bold">Στοιχεία αποστολής</h2>
+                <h2 class="text-xl font-bold">{{ __('Shipping details') }}</h2>
 
                 @foreach ([
-                    ['name', 'Ονοματεπώνυμο', 'text', 'name'],
-                    ['email', 'Email', 'email', 'email'],
-                    ['phone', 'Τηλέφωνο', 'tel', 'tel'],
-                    ['address', 'Διεύθυνση', 'text', 'street-address'],
-                    ['city', 'Πόλη', 'text', 'address-level2'],
-                    ['postal_code', 'Τ.Κ.', 'text', 'postal-code'],
+                    ['name', __('Full name'), 'text', 'name'],
+                    ['email', __('Email'), 'email', 'email'],
+                    ['phone', __('Phone'), 'tel', 'tel'],
+                    ['address', __('Address'), 'text', 'street-address'],
+                    ['city', __('City'), 'text', 'address-level2'],
+                    ['postal_code', __('Postal code'), 'text', 'postal-code'],
                 ] as [$field, $label, $type, $autocomplete])
                     <div class="flex flex-col gap-1">
                         <label for="{{ $field }}" class="font-semibold">{{ $label }}</label>
@@ -59,10 +59,10 @@
                 @endforeach
 
                 <div class="flex flex-col gap-1">
-                    <label for="country" class="font-semibold">Χώρα</label>
+                    <label for="country" class="font-semibold">{{ __('Country') }}</label>
                     <select id="country" name="country" autocomplete="country" class="p-2 border border-gray-500 bg-white dark:bg-gray-800">
                         @foreach ($countries as $code => $countryName)
-                            <option value="{{ $code }}" @selected(old('country', 'GR') === $code)>{{ $countryName }}</option>
+                            <option value="{{ $code }}" @selected(old('country', 'GR') === $code)>{{ __($countryName) }}</option>
                         @endforeach
                     </select>
                     @error('country')
@@ -71,7 +71,7 @@
                 </div>
 
                 <div class="flex flex-col gap-1">
-                    <label for="notes" class="font-semibold">Σημειώσεις <span class="font-normal text-gray-600">(προαιρετικό)</span></label>
+                    <label for="notes" class="font-semibold">{{ __('Notes') }} <span class="font-normal text-gray-600">({{ __('optional') }})</span></label>
                     <textarea id="notes" name="notes" rows="3" class="p-2 border border-gray-500 bg-white dark:bg-gray-800">{{ old('notes') }}</textarea>
                     @error('notes')
                         <p class="text-sm text-red-700">{{ $message }}</p>
@@ -83,12 +83,12 @@
                     class="mt-2 py-3 px-6 bg-black text-white dark:bg-gray-100 dark:text-black uppercase tracking-wider font-bold hover:opacity-80 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
                     :disabled="!purchasable"
                 >
-                    Υποβολή παραγγελίας
+                    {{ __('Place order') }}
                 </button>
             </form>
 
             <aside class="lg:col-span-5 p-4 border border-gray-400">
-                <h2 class="text-xl font-bold mb-4">Η παραγγελία σας</h2>
+                <h2 class="text-xl font-bold mb-4">{{ __('Your order') }}</h2>
 
                 <ul class="divide-y divide-gray-400">
                     <template x-for="line in lines" :key="line.id">
@@ -96,7 +96,7 @@
                             <span>
                                 <span x-text="line.name"></span>
                                 <span class="text-gray-600" x-text="'× ' + line.qty"></span>
-                                <span x-show="!line.available" class="block text-red-700 text-sm">Μη διαθέσιμο</span>
+                                <span x-show="!line.available" class="block text-red-700 text-sm">{{ __('Unavailable') }}</span>
                             </span>
                             <span class="font-semibold whitespace-nowrap" x-text="line.line_total + ' €'"></span>
                         </li>
@@ -104,11 +104,11 @@
                 </ul>
 
                 <p class="mt-4 pt-4 border-t border-gray-400 flex justify-between text-lg">
-                    <span>Σύνολο</span>
+                    <span>{{ __('Total') }}</span>
                     <span class="font-bold" x-text="subtotal + ' €'"></span>
                 </p>
 
-                <a href="{{ route('cart.index') }}" class="mt-4 inline-block text-sm underline">Επεξεργασία καλαθιού</a>
+                <a href="{{ route('cart.index') }}" class="mt-4 inline-block text-sm underline">{{ __('Edit cart') }}</a>
             </aside>
         </div>
     </section>

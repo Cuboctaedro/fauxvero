@@ -1,4 +1,7 @@
-<x-layout>
+<x-layout
+    :meta-title="$product->meta_title ?: $product->name"
+    :meta-description="$product->meta_description ?? ''"
+>
     <x-product-schema
         :title="$product->name"
         :description="$product->description"
@@ -38,7 +41,7 @@
 
             <div class="col-span-1 sm:col-span-4 md:col-span-8 lg:col-span-4">
                 <section class="content text-lg mb-12">
-                    <h2 class="sr-only">Περιγραφή</h2>
+                    <h2 class="sr-only">{{ __('Description') }}</h2>
                     {{ \Filament\Forms\Components\RichEditor\RichContentRenderer::make($product->description) }}
                 </section>
 
@@ -49,17 +52,17 @@
                 @endif
 
                 <section>
-                    <h2 class="sr-only">Χαρακτηριστικά</h2>
+                    <h2 class="sr-only">{{ __('Specifications') }}</h2>
                     @if($product->dimensions)
-                        <h3 class="font-bold my-2">Διαστάσεις</h3>
+                        <h3 class="font-bold my-2">{{ __('Dimensions') }}</h3>
                         <p>{{ $product->dimensions }}</p>
                     @endif
                     @if($product->weight)
-                        <h3 class="font-bold my-2">Βάρος</h3>
+                        <h3 class="font-bold my-2">{{ __('Weight') }}</h3>
                         <p>{{ $product->weight }}</p>
                     @endif
                     @if($product->material)
-                        <h3 class="font-bold my-2">Υλικό</h3>
+                        <h3 class="font-bold my-2">{{ __('Material') }}</h3>
                         <p>{{ $product->material }}</p>
                     @endif
                 </section>

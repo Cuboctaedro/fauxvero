@@ -8,9 +8,12 @@ use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
 {
+    /**
+     * Names are translation keys; translate them with __() when displaying.
+     */
     public const COUNTRIES = [
-        'GR' => 'Ελλάδα',
-        'CY' => 'Κύπρος',
+        'GR' => 'Greece',
+        'CY' => 'Cyprus',
     ];
 
     public function authorize(): bool
@@ -48,26 +51,26 @@ class StoreOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'required' => 'Το πεδίο «:attribute» είναι υποχρεωτικό.',
-            'email' => 'Το email δεν είναι έγκυρο.',
-            'max' => 'Το πεδίο «:attribute» είναι πολύ μεγάλο.',
-            'country.in' => 'Επιλέξτε μια διαθέσιμη χώρα.',
-            'items.required' => 'Το καλάθι σας είναι άδειο.',
-            'items.*' => 'Το καλάθι σας δεν είναι έγκυρο.',
+            'required' => __('The :attribute field is required.'),
+            'email' => __('The email address is not valid.'),
+            'max' => __('The :attribute field is too long.'),
+            'country.in' => __('Choose an available country.'),
+            'items.required' => __('Your cart is empty.'),
+            'items.*' => __('Your cart is not valid.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'name' => 'Ονοματεπώνυμο',
-            'email' => 'Email',
-            'phone' => 'Τηλέφωνο',
-            'address' => 'Διεύθυνση',
-            'city' => 'Πόλη',
-            'postal_code' => 'Τ.Κ.',
-            'country' => 'Χώρα',
-            'notes' => 'Σημειώσεις',
+            'name' => __('Full name'),
+            'email' => __('Email'),
+            'phone' => __('Phone'),
+            'address' => __('Address'),
+            'city' => __('City'),
+            'postal_code' => __('Postal code'),
+            'country' => __('Country'),
+            'notes' => __('Notes'),
         ];
     }
 }

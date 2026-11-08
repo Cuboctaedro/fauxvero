@@ -17,7 +17,6 @@ class Layout extends Component
         public string $metaKeywords = '',
         public bool $metaRobots = true,
         public string $metaImage = '',
-        public string $pagePath = '/',
     ) {}
 
     /**

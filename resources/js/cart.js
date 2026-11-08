@@ -1,7 +1,7 @@
 import Alpine from 'alpinejs';
 
 // Only product ids and quantities live in the browser. Names and prices always
-// come from the server (/cart/lines), so they can't go stale or be tampered with.
+// come from the server (the cart.lines route), so they can't go stale or be tampered with.
 const STORAGE_KEY = 'fauxvero.cart';
 const MAX_QTY = 99;
 
@@ -79,7 +79,8 @@ window.addEventListener('storage', (event) => {
 });
 
 // Server-priced view of the cart, shared by the cart and checkout pages.
-Alpine.data('cartLines', () => ({
+// The endpoint is the current locale's cart.lines URL, so names come back translated.
+Alpine.data('cartLines', (endpoint) => ({
     lines: [],
     subtotal: '0.00',
     purchasable: false,
@@ -102,7 +103,7 @@ Alpine.data('cartLines', () => ({
         }
 
         try {
-            const response = await fetch('/cart/lines', {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

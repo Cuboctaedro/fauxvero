@@ -28,7 +28,7 @@ function checkoutDetails(array $overrides = []): array
 }
 
 it('renders the checkout page', function () {
-    $this->get('/checkout')->assertOk()->assertSee('Ταμείο');
+    $this->get('/el/checkout')->assertOk()->assertSee('Ταμείο');
 });
 
 it('creates a pending order priced from the database', function () {
@@ -41,8 +41,8 @@ it('creates a pending order priced from the database', function () {
         ['id' => $chair->id, 'qty' => 1],
     ]);
 
-    $this->post('/checkout', checkoutDetails(['items' => $items, 'subtotal' => '1.00']))
-        ->assertRedirect(route('checkout.thank-you'));
+    $this->post('/el/checkout', checkoutDetails(['items' => $items, 'subtotal' => '1.00']))
+        ->assertRedirect('/el/checkout/thank-you');
 
     $order = Order::with('items')->sole();
 
@@ -65,7 +65,7 @@ it('shows the thank you page once the order is placed', function () {
     $product = Product::factory()->create(['in_stock' => true]);
 
     $this->followingRedirects()
-        ->post('/checkout', checkoutDetails(['items' => json_encode([['id' => $product->id, 'qty' => 1]])]))
+        ->post('/el/checkout', checkoutDetails(['items' => json_encode([['id' => $product->id, 'qty' => 1]])]))
         ->assertOk()
         ->assertSee(Order::sole()->number)
         ->assertSee('$store.cart.clear()', false);
@@ -74,15 +74,15 @@ it('shows the thank you page once the order is placed', function () {
 it('does not show the thank you page without a placed order', function () {
     Order::factory()->create();
 
-    $this->get('/checkout/thank-you')->assertNotFound();
+    $this->get('/el/checkout/thank-you')->assertNotFound();
 });
 
 it('refuses out of stock or inactive products', function (array $attributes) {
     $product = Product::factory()->create($attributes);
 
-    $this->from('/checkout')
-        ->post('/checkout', checkoutDetails(['items' => json_encode([['id' => $product->id, 'qty' => 1]])]))
-        ->assertRedirect('/checkout')
+    $this->from('/el/checkout')
+        ->post('/el/checkout', checkoutDetails(['items' => json_encode([['id' => $product->id, 'qty' => 1]])]))
+        ->assertRedirect('/el/checkout')
         ->assertSessionHasErrors('items');
 
     expect(Order::count())->toBe(0);
@@ -92,14 +92,14 @@ it('refuses out of stock or inactive products', function (array $attributes) {
 ]);
 
 it('refuses a product that no longer exists', function () {
-    $this->post('/checkout', checkoutDetails(['items' => json_encode([['id' => 9999, 'qty' => 1]])]))
+    $this->post('/el/checkout', checkoutDetails(['items' => json_encode([['id' => 9999, 'qty' => 1]])]))
         ->assertSessionHasErrors('items');
 
     expect(Order::count())->toBe(0);
 });
 
 it('refuses an empty cart', function (?string $items) {
-    $this->post('/checkout', checkoutDetails(['items' => $items]))
+    $this->post('/el/checkout', checkoutDetails(['items' => $items]))
         ->assertSessionHasErrors('items');
 })->with([
     'empty list' => ['[]'],
@@ -110,7 +110,7 @@ it('refuses an empty cart', function (?string $items) {
 it('validates the customer details', function () {
     $product = Product::factory()->create(['in_stock' => true]);
 
-    $this->post('/checkout', checkoutDetails([
+    $this->post('/el/checkout', checkoutDetails([
         'name' => '',
         'email' => 'not-an-email',
         'country' => 'US',

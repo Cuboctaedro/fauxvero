@@ -3,7 +3,7 @@
         "@@context": "https://schema.org",
         "@@type": "Product",
         "name": {{ $title }},
-        "url": {{ config('app.url') . '/products/' . $slug }},
+        "url": {{ route('products.show', $slug) }},
         "image": {{ $image }},
         "description": {{ $description }},
         "offers": {

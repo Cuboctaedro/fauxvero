@@ -1,5 +1,5 @@
 <article class="flex flex-col items-stretch pb-6">
-    <a href="/products/{{ $slug }}" class="aspect-square bg-gray-200 flex items-center justify-center">
+    <a href="{{ route('products.show', $slug) }}" class="aspect-square bg-gray-200 flex items-center justify-center">
         <x-asset-image
             :asset="$asset"
             :alt="$title"
@@ -10,7 +10,7 @@
     </a>
     <header >
         <h3 class="text-lg font-semibold">
-            <a href="/products/{{ $slug }}">
+            <a href="{{ route('products.show', $slug) }}">
             {{ $title }}
             </a>
         </h3>
