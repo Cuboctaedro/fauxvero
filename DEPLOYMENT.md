@@ -354,6 +354,11 @@ Every new site on this stack follows the same recipe:
   scratch database, so you know the steps before you need them.
 - **Updates**: Coolify updates itself if auto-update is on (**Settings → Configuration**), and Ubuntu installs
   security updates. Reboot the server every now and then (`reboot`; all containers restart on their own).
+- **PHP security releases**: the `Dockerfile` pins an exact `serversideup/php` release (e.g. `8.4-fpm-nginx-v5.1.3`),
+  so PHP never updates on its own. When [php.net](https://www.php.net/) announces an 8.4 release, which happens about
+  monthly, change the tag to the newest `8.4-fpm-nginx-v…` on
+  [Docker Hub](https://hub.docker.com/r/serversideup/php/tags?name=8.4-fpm-nginx-v), push, and check that the `app`
+  log shows the new PHP version. Read serversideup's release notes before moving to a new major version (v5 → v6).
 
 ## Not set up yet
 

@@ -4,7 +4,8 @@
 ############################################
 # Base: PHP with the extensions the app needs
 ############################################
-FROM serversideup/php:8.4-fpm-nginx AS base
+# Pinned: the floating tag moved to a new major version without notice.
+FROM serversideup/php:8.4-fpm-nginx-v5.1.3 AS base
 
 USER root
 # intl: Filament · gd + exif: media library image conversions · bcmath: money math

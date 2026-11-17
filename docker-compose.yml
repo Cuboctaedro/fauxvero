@@ -45,7 +45,9 @@ services:
       args:
         GITHUB_TOKEN: "${GITHUB_TOKEN:-}"
     restart: unless-stopped
-    command: ["php", "/var/www/html/artisan", "queue:work", "--tries=3", "--max-time=3600"]
+    # No --max-time: when queue:work exits, the whole container restarts, and Coolify
+    # stops the app after too many restarts (the site went down every day or two).
+    command: ["php", "/var/www/html/artisan", "queue:work", "--tries=3"]
     stop_signal: SIGTERM
     healthcheck:
       test: ["CMD", "healthcheck-queue"]
